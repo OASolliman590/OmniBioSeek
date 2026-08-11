@@ -52,3 +52,54 @@ def test_omicsdi_pagination_and_mapping(query):
     assert records[0].taxonomy_ids == ["9606"]
     assert len(calls) == 2
 
+
+def test_omicsdi_fetch_study_uses_live_path_contract(query):
+    calls = []
+
+    def transport(url, headers):
+        calls.append(url)
+        import json
+
+        if "/search?" in url:
+            return HttpResponse(
+                200,
+                json.dumps(
+                    {
+                        "count": 1,
+                        "datasets": [
+                            {
+                                "id": "E-GEOD-18662",
+                                "source": "biostudies-arrayexpress",
+                                "title": "Perirenal adipose tissue",
+                                "description": "kidney donor",
+                            }
+                        ],
+                    }
+                ).encode(),
+                {},
+                url,
+            )
+        return HttpResponse(
+            200,
+            json.dumps(
+                {
+                    "accession": "E-GEOD-18662",
+                    "database": "biostudies-arrayexpress",
+                    "name": "Perirenal adipose tissue",
+                    "description": "kidney donor",
+                    "cross_references": {"pubmed": ["20846162"]},
+                }
+            ).encode(),
+            {},
+            url,
+        )
+
+    from omnibioseek.http import HttpClient
+
+    adapter = OmicsDIAdapter(HttpClient(transport=transport))
+    minimal = query.model_copy(update={"modalities": [Modality.TRANSCRIPTOMICS], "priority_terms": []})
+    record = next(iter(adapter.search(minimal)))
+    detail = adapter.fetch_study(record.accession)
+    assert detail is not None
+    assert detail.pmids == ["20846162"]
+    assert calls[-1].endswith("/dataset/biostudies-arrayexpress/E-GEOD-18662")

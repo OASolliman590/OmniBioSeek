@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from omnibioseek.adapters.base import RepositoryAdapter
 from omnibioseek.adapters.pride import PrideFileResolver
@@ -22,6 +23,7 @@ class OmicsDIAdapter(RepositoryAdapter):
         self.client = client or HttpClient()
         self.page_size = min(max(page_size, 1), 100)
         self.pride = PrideFileResolver(self.client)
+        self._databases: dict[str, str] = {}
 
     def build_queries(self, query: QuerySpec) -> list[str]:
         tissues = [term for group in query.tissues for term in group.terms]
@@ -72,6 +74,7 @@ class OmicsDIAdapter(RepositoryAdapter):
                     if not accession or key in seen:
                         continue
                     seen.add(key)
+                    self._databases[accession] = source
                     yield self._record(item, search_query)
                 start += len(datasets)
                 count = int(payload.get("count", start) or 0)
@@ -80,7 +83,7 @@ class OmicsDIAdapter(RepositoryAdapter):
 
     def _record(self, item: dict[str, Any], search_query: str = "") -> DatasetRecord:
         accession = str(item.get("id") or item.get("accession") or "")
-        repository = str(item.get("source") or item.get("repository") or "omicsdi")
+        repository = str(item.get("source") or item.get("repository") or item.get("database") or "omicsdi")
         title = str(item.get("title") or item.get("name") or "")
         description = str(item.get("description") or "")
         organisms = [
@@ -94,6 +97,13 @@ class OmicsDIAdapter(RepositoryAdapter):
         ]
         publications = as_list(item.get("publications"))
         pmids = [str(value.get("id")) for value in publications if isinstance(value, dict) and value.get("id")]
+        cross_references = item.get("cross_references") or {}
+        if isinstance(cross_references, dict):
+            pmids.extend(str(value) for value in as_list(cross_references.get("pubmed")))
+        dates = item.get("dates") or {}
+        publication_date = item.get("publicationDate")
+        if not publication_date and isinstance(dates, dict):
+            publication_date = dates.get("publication") or dates.get("submission")
         return DatasetRecord(
             source="omicsdi",
             accession=accession,
@@ -105,8 +115,8 @@ class OmicsDIAdapter(RepositoryAdapter):
                 str(item.get("omics_type") or ""), title, description, " ".join(as_list(item.get("keywords")))
             ),
             keywords=[str(value) for value in as_list(item.get("keywords"))],
-            publication_date=parse_date(item.get("publicationDate")),
-            pmids=pmids,
+            publication_date=parse_date(publication_date),
+            pmids=list(dict.fromkeys(pmids)),
             repository=repository,
             source_url=f"https://www.omicsdi.org/dataset/{repository}/{accession}",
             provenance={"search_query": search_query, "omicsdi": item, "cross_accessions": [accession]},
@@ -116,10 +126,11 @@ class OmicsDIAdapter(RepositoryAdapter):
         database, _, actual_accession = accession.partition(":")
         if not actual_accession:
             actual_accession = database
-            database = ""
+            database = self._databases.get(actual_accession, "")
+        if not database:
+            return None
         payload = self.client.get_json(
-            f"{self.base_url}/get",
-            params={"acc": actual_accession, "database": database or None},
+            f"{self.base_url}/{quote(database, safe='')}/{quote(actual_accession, safe='')}",
         )
         return self._record(payload) if payload else None
 
@@ -134,4 +145,3 @@ class OmicsDIAdapter(RepositoryAdapter):
 
     def download_processed(self, file_record: FileRecord, destination: str) -> FileRecord:
         return Downloader().download(file_record, Path(destination))
-
