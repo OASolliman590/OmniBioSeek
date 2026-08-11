@@ -1,0 +1,119 @@
+name: pvat_prat_predm_kidney
+version: 1
+description: >-
+  Exact human PVAT/PRAT discovery for explicit prediabetes or diagnosed kidney
+  disease, retaining relevant cases and within-study controls.
+
+query:
+  organisms:
+    - Homo sapiens
+    - human
+  taxonomy_ids:
+    - "9606"
+  repositories:
+    - omicsdi
+    - ncbi
+    - arc
+  modalities:
+    - transcriptomics
+    - proteomics
+    - single_cell
+  match_policy: exact
+  require_same_sample: true
+  retain_controls: true
+  processed_only: true
+
+  tissues:
+    - name: PVAT
+      terms:
+        - PVAT
+        - perivascular adipose tissue
+        - perivascular fat
+        - periaortic adipose tissue
+        - periaortic fat
+      ontology_ids: []
+    - name: PRAT
+      terms:
+        - PRAT
+        - perirenal adipose tissue
+        - perirenal fat
+        - perinephric adipose tissue
+        - perinephric fat
+      ontology_ids: []
+
+  diseases:
+    - name: prediabetes
+      terms:
+        - prediabetes
+        - pre-diabetes
+        - prediabetic
+        - pre-diabetic
+        - impaired fasting glucose
+        - impaired glucose tolerance
+      ontology_ids:
+        - MONDO:0006920
+    - name: kidney_disease
+      terms:
+        - chronic kidney disease
+        - CKD
+        - diabetic kidney disease
+        - diabetic nephropathy
+        - acute kidney injury
+        - AKI
+        - end-stage renal disease
+        - end stage renal disease
+        - ESRD
+        - end-stage kidney disease
+        - ESKD
+        - renal failure
+        - renal insufficiency
+        - glomerular disease
+        - glomerulonephritis
+        - nephropathy
+        - renal transplant
+        - kidney transplant
+      ontology_ids:
+        - MONDO:0005240
+
+  treatments:
+    - name: metformin
+      terms:
+        - metformin
+        - Glucophage
+      ontology_ids:
+        - CHEBI:6801
+    - name: lifestyle
+      terms:
+        - lifestyle intervention
+        - diet intervention
+        - exercise intervention
+        - weight loss intervention
+      ontology_ids: []
+  priority_terms:
+    - metformin
+    - Glucophage
+    - CHEBI:6801
+  exclude_terms:
+    - generic visceral adipose tissue
+    - subcutaneous adipose tissue
+    - epicardial adipose tissue
+    - renal sinus adipose tissue
+    - kidney cancer
+    - renal cell carcinoma
+    - healthy kidney donor
+
+curation:
+  explicit_prediabetes_only: true
+  infer_from_laboratory_values: false
+  cancer_nephrectomy_is_kidney_disease: false
+  retain_case_control_arms: true
+  exclude_unrelated_arms_from_integration: true
+
+integration:
+  separate_modalities: true
+  generate_pseudobulk: true
+  biological_replicate_fields:
+    - donor_id
+    - sample_id
+  batch_correct_only_when_identifiable: true
+

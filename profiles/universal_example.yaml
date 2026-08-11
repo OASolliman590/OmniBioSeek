@@ -1,0 +1,26 @@
+name: mouse_liver_metformin_example
+version: 1
+description: Example showing that the engine is not disease- or organism-specific.
+query:
+  organisms: [Mus musculus, mouse]
+  taxonomy_ids: ["10090"]
+  repositories: [omicsdi, ncbi, arc]
+  modalities: [transcriptomics, proteomics, single_cell]
+  tissues:
+    - name: liver
+      terms: [liver, hepatic tissue]
+      ontology_ids: [UBERON:0002107]
+  diseases:
+    - name: fatty_liver_disease
+      terms: [fatty liver disease, hepatic steatosis]
+  treatments:
+    - name: metformin
+      terms: [metformin, Glucophage]
+      ontology_ids: [CHEBI:6801]
+  priority_terms: [metformin]
+  exclude_terms: []
+  match_policy: exact
+  require_same_sample: true
+  retain_controls: true
+  processed_only: true
+

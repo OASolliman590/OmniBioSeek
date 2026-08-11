@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omnibioseek"
+version = "0.1.0"
+description = "Universal, provenance-first discovery and collection of public omics datasets"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "OmniBioSeek contributors"}]
+keywords = ["bioinformatics", "omics", "transcriptomics", "proteomics", "single-cell"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+  "pydantic>=2.8,<3",
+  "PyYAML>=6.0,<7",
+  "typer>=0.12,<1",
+]
+
+[project.optional-dependencies]
+analysis = [
+  "anndata>=0.10,<1",
+  "gcsfs>=2025.1",
+  "pandas>=2.2,<4",
+  "pyarrow>=17",
+  "scanpy>=1.10,<2",
+]
+dev = [
+  "mypy>=1.11",
+  "pytest>=8.3",
+  "pytest-cov>=5",
+  "ruff>=0.7",
+  "types-PyYAML>=6.0",
+]
+
+[project.scripts]
+omnibioseek = "omnibioseek.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["omnibioseek"]
+
+[[tool.mypy.overrides]]
+module = ["anndata.*", "gcsfs.*", "numpy.*", "pandas.*", "pyarrow.*", "scipy.*", "scanpy.*"]
+ignore_missing_imports = true

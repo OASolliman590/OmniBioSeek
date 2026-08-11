@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnibioseek.example/schemas/query-profile.schema.json",
+  "title": "OmniBioSeek query profile",
+  "type": "object",
+  "required": ["name", "query"],
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1},
+    "description": {"type": "string"},
+    "query": {
+      "type": "object",
+      "properties": {
+        "organisms": {"type": "array", "items": {"type": "string"}},
+        "taxonomy_ids": {"type": "array", "items": {"type": "string"}},
+        "repositories": {"type": "array", "items": {"type": "string"}},
+        "modalities": {"type": "array", "items": {"type": "string"}},
+        "tissues": {"$ref": "#/$defs/termGroups"},
+        "diseases": {"$ref": "#/$defs/termGroups"},
+        "treatments": {"$ref": "#/$defs/termGroups"},
+        "priority_terms": {"type": "array", "items": {"type": "string"}},
+        "exclude_terms": {"type": "array", "items": {"type": "string"}},
+        "match_policy": {"enum": ["exact", "tiered", "broad"]},
+        "require_same_sample": {"type": "boolean"},
+        "retain_controls": {"type": "boolean"},
+        "processed_only": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "termGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "terms"],
+        "properties": {
+          "name": {"type": "string"},
+          "terms": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "ontology_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}
+

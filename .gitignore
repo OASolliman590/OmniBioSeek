@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+.env
+*.secret
+
+# Real data and generated artifacts never belong in Git.
+data/
+downloads/
+cache/
+catalogs/
+prepared/
+integrated/
+reports/
+logs/
+*.sqlite
+*.sqlite3
+*.db
+*.h5ad
+*.zarr/
+*.parquet
+*.part
+
+# Allow deliberately small test fixtures.
+!tests/fixtures/**
+
