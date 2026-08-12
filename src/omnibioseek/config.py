@@ -49,7 +49,7 @@ def load_profile(path: str | Path) -> QuerySpec:
 
     query = dict(raw.get("query", raw))
     query["name"] = raw.get("name", query.get("name", profile_path.stem))
-    for key in ("tissues", "diseases", "treatments"):
+    for key in ("tissues", "diseases", "treatments", "mechanisms"):
         query[key] = _term_groups(query.get(key), key)
     query["metadata"] = {
         **query.get("metadata", {}),
@@ -58,9 +58,9 @@ def load_profile(path: str | Path) -> QuerySpec:
         "profile_description": raw.get("description", ""),
         "curation": raw.get("curation", {}),
         "integration": raw.get("integration", {}),
+        "evidence_tiers": raw.get("evidence_tiers", {}),
     }
     try:
         return QuerySpec.model_validate(query)
     except ValidationError as exc:
         raise ProfileError(str(exc)) from exc
-
