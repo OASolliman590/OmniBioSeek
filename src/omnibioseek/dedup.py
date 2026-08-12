@@ -6,7 +6,11 @@ import re
 
 from omnibioseek.models import DatasetRecord
 
-ACCESSION_PATTERN = re.compile(r"\b(?:GSE|GSM|SRP|SRX|SRS|SRR|ERP|ERX|PRJNA|PXD)\d+\b", re.I)
+ACCESSION_PATTERN = re.compile(
+    r"\b(?:GSE\d+|GSM\d+|SRP\d+|SRX\d+|SRS\d+|SRR\d+|ERP\d+|ERX\d+|ERS\d+|ERR\d+|"
+    r"PRJNA\d+|PRJEB\d+|PXD\d+|E-MTAB-\d+|E-GEOD-\d+|S-BSST\d+|MTBLS\d+)\b",
+    re.I,
+)
 
 
 def cross_accessions(record: DatasetRecord) -> set[str]:
@@ -35,7 +39,7 @@ def deduplicate(records: list[DatasetRecord]) -> list[DatasetRecord]:
             group_tokens[target].update(group_tokens.pop(index))
 
     deduplicated: list[DatasetRecord] = []
-    priority = {"ncbi": 0, "arc": 1, "omicsdi": 2}
+    priority = {"ncbi": 0, "arc": 1, "pride": 2, "omicsdi": 3, "pubmed": 4}
     for index, group in enumerate(groups):
         primary = sorted(group, key=lambda item: priority.get(item.source, 10))[0].model_copy(deep=True)
         primary.canonical_id = sorted(group_tokens[index])[0] if group_tokens else primary.record_id
