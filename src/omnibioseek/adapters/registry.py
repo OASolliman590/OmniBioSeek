@@ -30,13 +30,11 @@ def default_registry() -> AdapterRegistry:
     from omnibioseek.adapters.arc import ArcAdapter
     from omnibioseek.adapters.ncbi import NcbiAdapter
     from omnibioseek.adapters.omicsdi import OmicsDIAdapter
-    from omnibioseek.adapters.pride import PrideAdapter
     from omnibioseek.adapters.pubmed import PubMedAdapter
 
     registry = AdapterRegistry()
     registry.register("pubmed", PubMedAdapter)
     registry.register("omicsdi", OmicsDIAdapter)
     registry.register("ncbi", NcbiAdapter)
-    registry.register("pride", PrideAdapter)
     registry.register("arc", ArcAdapter)
     return registry
