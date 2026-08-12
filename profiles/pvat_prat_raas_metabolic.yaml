@@ -1,9 +1,10 @@
 name: pvat_prat_raas_metabolic
-version: 1
+version: 2
 description: >-
   High-recall discovery of PVAT and PRAT transcriptomic/proteomic studies across
   metabolic disease states, with RAAS terms used as mechanistic annotations rather
-  than mandatory inclusion criteria. Human evidence is prioritized while mouse
+  than mandatory inclusion criteria. PubMed/PMC is mined for dataset accessions
+  before cross-repository deduplication. Human evidence is prioritized while mouse
   and rat studies are retained for mechanistic support.
 
 query:
@@ -19,6 +20,7 @@ query:
     - "10090"
     - "10116"
   repositories:
+    - pubmed
     - omicsdi
     - ncbi
     - arc
@@ -30,6 +32,9 @@ query:
   require_same_sample: false
   retain_controls: true
   processed_only: true
+  metadata:
+    literature_max_results: 150
+    retain_literature_without_accession: true
 
   tissues:
     - name: PVAT
@@ -62,53 +67,22 @@ query:
 
   diseases:
     - name: prediabetes
-      terms:
-        - prediabetes
-        - pre-diabetes
-        - prediabetic
-        - pre-diabetic
-        - impaired fasting glucose
-        - impaired glucose tolerance
-      ontology_ids:
-        - MONDO:0006920
+      terms: [prediabetes, pre-diabetes, prediabetic, pre-diabetic, impaired fasting glucose, impaired glucose tolerance]
+      ontology_ids: [MONDO:0006920]
     - name: metabolic_syndrome
-      terms:
-        - metabolic syndrome
-        - metabolic syndrome X
-        - cardiometabolic syndrome
-        - MetS
+      terms: [metabolic syndrome, metabolic syndrome X, cardiometabolic syndrome, MetS]
       ontology_ids: []
     - name: insulin_resistance
-      terms:
-        - insulin resistance
-        - insulin resistant
-        - hyperinsulinemia
-        - hyperinsulinaemia
+      terms: [insulin resistance, insulin resistant, hyperinsulinemia, hyperinsulinaemia]
       ontology_ids: []
     - name: obesity
-      terms:
-        - obesity
-        - obese
-        - diet-induced obesity
-        - high-fat diet
-        - high fat diet
-        - HFD
+      terms: [obesity, obese, diet-induced obesity, high-fat diet, high fat diet, HFD]
       ontology_ids: []
     - name: type_2_diabetes
-      terms:
-        - type 2 diabetes
-        - type 2 diabetes mellitus
-        - T2D
-        - T2DM
-        - diabetic
-        - hyperglycemia
-        - hyperglycaemia
+      terms: [type 2 diabetes, type 2 diabetes mellitus, T2D, T2DM, diabetic, hyperglycemia, hyperglycaemia]
       ontology_ids: []
     - name: hypertension
-      terms:
-        - hypertension
-        - hypertensive
-        - high blood pressure
+      terms: [hypertension, hypertensive, high blood pressure]
       ontology_ids: []
 
   mechanisms:
@@ -185,22 +159,14 @@ evidence_tiers:
   A:
     description: Human PVAT/PRAT omics with prediabetes or metabolic syndrome.
     species: human
-    phenotypes:
-      - prediabetes
-      - metabolic_syndrome
+    phenotypes: [prediabetes, metabolic_syndrome]
   B:
     description: Human PVAT/PRAT omics with insulin resistance, obesity, T2D, or hypertension.
     species: human
-    phenotypes:
-      - insulin_resistance
-      - obesity
-      - type_2_diabetes
-      - hypertension
+    phenotypes: [insulin_resistance, obesity, type_2_diabetes, hypertension]
   C:
     description: Mouse/rat PVAT/PRAT omics or RAAS perturbation studies supporting mechanism.
-    species:
-      - mouse
-      - rat
+    species: [mouse, rat]
     mechanistic_support: true
 
 integration:
@@ -208,9 +174,6 @@ integration:
   separate_tissues: true
   separate_species: true
   generate_pseudobulk: true
-  biological_replicate_fields:
-    - donor_id
-    - sample_id
+  biological_replicate_fields: [donor_id, sample_id]
   batch_correct_only_when_identifiable: true
-  interrogate_mechanisms:
-    - RAAS
+  interrogate_mechanisms: [RAAS]
