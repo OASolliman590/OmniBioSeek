@@ -1,0 +1,216 @@
+name: pvat_prat_raas_metabolic
+version: 1
+description: >-
+  High-recall discovery of PVAT and PRAT transcriptomic/proteomic studies across
+  metabolic disease states, with RAAS terms used as mechanistic annotations rather
+  than mandatory inclusion criteria. Human evidence is prioritized while mouse
+  and rat studies are retained for mechanistic support.
+
+query:
+  organisms:
+    - Homo sapiens
+    - human
+    - Mus musculus
+    - mouse
+    - Rattus norvegicus
+    - rat
+  taxonomy_ids:
+    - "9606"
+    - "10090"
+    - "10116"
+  repositories:
+    - omicsdi
+    - ncbi
+    - arc
+  modalities:
+    - transcriptomics
+    - proteomics
+    - single_cell
+  match_policy: tiered
+  require_same_sample: false
+  retain_controls: true
+  processed_only: true
+
+  tissues:
+    - name: PVAT
+      terms:
+        - PVAT
+        - perivascular adipose tissue
+        - perivascular adipose
+        - perivascular fat
+        - periaortic adipose tissue
+        - periaortic adipose
+        - periaortic fat
+        - aortic adipose tissue
+        - aortic fat
+        - adipose tissue surrounding aorta
+        - coronary perivascular adipose tissue
+        - mesenteric perivascular adipose tissue
+      ontology_ids: []
+    - name: PRAT
+      terms:
+        - PRAT
+        - perirenal adipose tissue
+        - perirenal adipose
+        - perirenal fat
+        - perinephric adipose tissue
+        - perinephric adipose
+        - perinephric fat
+        - renal perivascular adipose tissue
+        - renal perivascular fat
+      ontology_ids: []
+
+  diseases:
+    - name: prediabetes
+      terms:
+        - prediabetes
+        - pre-diabetes
+        - prediabetic
+        - pre-diabetic
+        - impaired fasting glucose
+        - impaired glucose tolerance
+      ontology_ids:
+        - MONDO:0006920
+    - name: metabolic_syndrome
+      terms:
+        - metabolic syndrome
+        - metabolic syndrome X
+        - cardiometabolic syndrome
+        - MetS
+      ontology_ids: []
+    - name: insulin_resistance
+      terms:
+        - insulin resistance
+        - insulin resistant
+        - hyperinsulinemia
+        - hyperinsulinaemia
+      ontology_ids: []
+    - name: obesity
+      terms:
+        - obesity
+        - obese
+        - diet-induced obesity
+        - high-fat diet
+        - high fat diet
+        - HFD
+      ontology_ids: []
+    - name: type_2_diabetes
+      terms:
+        - type 2 diabetes
+        - type 2 diabetes mellitus
+        - T2D
+        - T2DM
+        - diabetic
+        - hyperglycemia
+        - hyperglycaemia
+      ontology_ids: []
+    - name: hypertension
+      terms:
+        - hypertension
+        - hypertensive
+        - high blood pressure
+      ontology_ids: []
+
+  mechanisms:
+    - name: RAAS
+      terms:
+        - RAAS
+        - renin angiotensin aldosterone system
+        - renin-angiotensin-aldosterone system
+        - renin angiotensin system
+        - renin-angiotensin system
+        - angiotensin II
+        - Ang II
+        - angiotensinogen
+        - AGT
+        - renin
+        - REN
+        - ACE
+        - ACE2
+        - angiotensin converting enzyme
+        - angiotensin-converting enzyme
+        - AGTR1
+        - AT1 receptor
+        - angiotensin II receptor type 1
+        - AGTR2
+        - AT2 receptor
+        - angiotensin II receptor type 2
+        - MAS1
+        - Mas receptor
+        - aldosterone
+        - NR3C2
+        - mineralocorticoid receptor
+        - CYP11B2
+        - aldosterone synthase
+        - ATP6AP2
+        - prorenin receptor
+        - pro-renin receptor
+        - LNPEP
+        - ANPEP
+        - ENPEP
+        - MME
+        - chymase
+        - CTSG
+      ontology_ids: []
+
+  priority_terms:
+    - RAAS
+    - angiotensin II
+    - AGT
+    - REN
+    - ACE
+    - ACE2
+    - AGTR1
+    - AGTR2
+    - MAS1
+    - aldosterone
+    - NR3C2
+    - metabolic syndrome
+    - prediabetes
+
+  exclude_terms:
+    - kidney cancer
+    - renal cell carcinoma
+
+curation:
+  discovery_goal: high_recall
+  phenotype_is_required_for_discovery: false
+  mechanism_is_required_for_discovery: false
+  infer_prediabetes_from_laboratory_values: false
+  retain_case_control_arms: true
+  exclude_unrelated_arms_from_integration: true
+  manual_review_required_before_analysis: true
+
+evidence_tiers:
+  A:
+    description: Human PVAT/PRAT omics with prediabetes or metabolic syndrome.
+    species: human
+    phenotypes:
+      - prediabetes
+      - metabolic_syndrome
+  B:
+    description: Human PVAT/PRAT omics with insulin resistance, obesity, T2D, or hypertension.
+    species: human
+    phenotypes:
+      - insulin_resistance
+      - obesity
+      - type_2_diabetes
+      - hypertension
+  C:
+    description: Mouse/rat PVAT/PRAT omics or RAAS perturbation studies supporting mechanism.
+    species:
+      - mouse
+      - rat
+    mechanistic_support: true
+
+integration:
+  separate_modalities: true
+  separate_tissues: true
+  separate_species: true
+  generate_pseudobulk: true
+  biological_replicate_fields:
+    - donor_id
+    - sample_id
+  batch_correct_only_when_identifiable: true
+  interrogate_mechanisms:
+    - RAAS
