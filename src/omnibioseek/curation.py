@@ -36,7 +36,8 @@ def _sample_text(sample: SampleRecord) -> str:
 
 
 def _dataset_text(dataset: DatasetRecord) -> str:
-    return " | ".join([dataset.title, dataset.description, " ".join(dataset.keywords)])
+    literature_text = str(dataset.provenance.get("literature_text") or "")
+    return " | ".join([dataset.title, dataset.description, " ".join(dataset.keywords), literature_text])
 
 
 def _add_evidence(evidence, dataset, sample_accession, category, matches, text, source, confidence, decision):
@@ -109,7 +110,8 @@ def curate_dataset(dataset: DatasetRecord, samples: list[SampleRecord], query: Q
     dataset_mechanisms = match_groups(dataset_text, query.mechanisms)
     mechanism_hits.update(match.group for match in dataset_mechanisms)
     dataset_excluded = [term for term in query.exclude_terms if contains_exact(dataset_text, term)]
-    _add_evidence(evidence, dataset, None, "mechanism", dataset_mechanisms, dataset_text, "study_metadata", 0.7, EvidenceDecision.REVIEW)
+    evidence_source = "literature_and_study_metadata" if output.provenance.get("literature_text") else "study_metadata"
+    _add_evidence(evidence, dataset, None, "mechanism", dataset_mechanisms, dataset_text, evidence_source, 0.7, EvidenceDecision.REVIEW)
 
     tissue_any = sample_tissue_only or bool(dataset_tissues)
     disease_any = sample_disease_only or bool(dataset_diseases)
@@ -124,8 +126,8 @@ def curate_dataset(dataset: DatasetRecord, samples: list[SampleRecord], query: Q
         if dataset_tissues and dataset_diseases:
             output.eligibility = EligibilityStatus.NEEDS_REVIEW
             output.exclusion_reason = "study-level match lacks same-sample tissue/disease confirmation"
-            _add_evidence(evidence, dataset, None, "tissue", dataset_tissues, dataset_text, "study_metadata", 0.6, EvidenceDecision.REVIEW)
-            _add_evidence(evidence, dataset, None, "disease", dataset_diseases, dataset_text, "study_metadata", 0.6, EvidenceDecision.REVIEW)
+            _add_evidence(evidence, dataset, None, "tissue", dataset_tissues, dataset_text, evidence_source, 0.6, EvidenceDecision.REVIEW)
+            _add_evidence(evidence, dataset, None, "disease", dataset_diseases, dataset_text, evidence_source, 0.6, EvidenceDecision.REVIEW)
         else:
             output.eligibility = EligibilityStatus.REJECTED
             missing = []
@@ -144,7 +146,7 @@ def curate_dataset(dataset: DatasetRecord, samples: list[SampleRecord], query: Q
         else:
             output.eligibility = EligibilityStatus.REJECTED
             output.exclusion_reason = "no target PVAT/PRAT evidence"
-    else:  # BROAD: maximize recall; tissue evidence alone is sufficient for candidate retention.
+    else:
         if tissue_any:
             output.eligibility = EligibilityStatus.NEEDS_REVIEW
             output.exclusion_reason = "broad discovery candidate; phenotype and mechanism require curation"
