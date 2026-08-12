@@ -6,7 +6,18 @@ This workflow is intended for sparse public-omics questions where strict same-sa
 
 Discover transcriptomic and proteomic evidence from perivascular adipose tissue (PVAT) and perirenal adipose tissue (PRAT) across control and metabolic disease states, then annotate and interrogate local renin–angiotensin–aldosterone system (RAAS) biology.
 
-RAAS is deliberately an annotation/mechanism layer, not an inclusion requirement. A dataset can therefore be retained even when its repository metadata does not mention RAAS, because RAAS genes/proteins may still be measurable in the matrix.
+RAAS is deliberately an annotation/mechanism layer, not an inclusion requirement. A dataset can therefore be retained even when repository metadata does not mention RAAS, because RAAS genes/proteins may still be measurable in the matrix.
+
+## Discovery architecture
+
+The profile now uses two complementary routes:
+
+1. **Repository-first discovery:** OmicsDI, NCBI GEO/SRA, and Arc scBaseCount.
+2. **Literature-first discovery:** PubMed is searched broadly for PVAT/PRAT omics papers. When a paper is available through PubMed Central, its article XML is inspected for public omics accessions. Accessions such as `GSE`, `SRP`, `PRJNA`, `PXD`, `E-MTAB`, `S-BSST`, and `MTBLS` are attached to literature-derived records and merged with repository records by the normal deduplication layer.
+
+The literature route intentionally does not require a metabolic phenotype or RAAS term in the PubMed query. Those concepts are evaluated during curation, which prevents relevant omics papers from disappearing because their title/abstract uses different clinical language.
+
+Set `NCBI_EMAIL` and, when available, `NCBI_API_KEY` in the environment for courteous NCBI E-utilities use. The profile controls the maximum literature results with `query.metadata.literature_max_results`.
 
 ## Evidence hierarchy
 
@@ -40,4 +51,6 @@ omnibioseek integrate --profile profiles\pvat_prat_raas_metabolic.yaml
 
 ## Important limitations
 
-The current adapters search OmicsDI, NCBI GEO/SRA, and Arc scBaseCount. This change improves recall and biological framing but does not yet implement literature-to-accession mining or a separate direct BioStudies adapter. PRIDE records reachable through OmicsDI remain the current proteomics route. Those capabilities should be added as subsequent milestones rather than implied by this profile.
+Literature mining can extract an accession only when it is present in the PubMed record or retrievable PubMed Central full text. Publisher-only supplementary files are not scraped. Literature-only candidates without a visible accession are retained for review when configured, rather than being represented as downloadable datasets.
+
+PRIDE file resolution remains available through PXD records discovered by OmicsDI. A dedicated BioStudies adapter and publisher supplementary-material mining are still future extensions; this workflow does not claim those capabilities yet.
