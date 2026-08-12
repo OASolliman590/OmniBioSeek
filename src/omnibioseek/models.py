@@ -86,6 +86,7 @@ class QuerySpec(OmniModel):
     tissues: list[TermGroup] = Field(default_factory=list)
     diseases: list[TermGroup] = Field(default_factory=list)
     treatments: list[TermGroup] = Field(default_factory=list)
+    mechanisms: list[TermGroup] = Field(default_factory=list)
     priority_terms: list[str] = Field(default_factory=list)
     exclude_terms: list[str] = Field(default_factory=list)
     modalities: list[Modality] = Field(default_factory=list)
@@ -212,4 +213,3 @@ class RunRecord(OmniModel):
     status: str = "running"
     warnings: list[str] = Field(default_factory=list)
     counts: dict[str, int] = Field(default_factory=dict)
-
